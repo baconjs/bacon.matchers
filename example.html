@@ -1,0 +1,11 @@
+<html>
+  <body>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/bacon.min.js"></script>
+    <script src="bacon.matchers.js"></script>
+    <script>
+      Bacon.constant(2).is().equalTo(1).log()
+      Bacon.constant(2).is().in([1,2,3]).log()
+    </script>
+  </body>
+</html>
