@@ -1,0 +1,14 @@
+{
+  "name": "bacon.matchers",
+  "version": "0.1.0",
+  "description": "The best project ever.",
+  "dependencies": {
+    "baconjs": "0.6.22"
+  },
+  "devDependencies": {
+    "coffee-script": "~1.6.3"
+  },
+  "scripts": {
+    "prepublish": "./build.sh"
+  }
+}

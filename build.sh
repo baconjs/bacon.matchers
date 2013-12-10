@@ -1,0 +1,1 @@
+coffee -c bacon.matchers.coffee
