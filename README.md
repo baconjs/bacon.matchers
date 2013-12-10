@@ -1,15 +1,16 @@
-Not much here yet. Will be a great matcher API for bacon.js when grows up.
+Matcher library for [Bacon.js](https://github.com/raimohanska/bacon.js).
 
-The idea is to add something like this to [bacon.js](https://github.com/raimohanska/bacon.js)
- 
-    age.is.equalTo(65)
+You can map a Property / EventStream to a `boolean` one like using `.is()`
+
+    age.is().equalTo(65)
     salary.is.greaterThan(1000)
-    name.matches(/.*Smith/)
-    keyUps.when.field("keyCode").isBetween(39,43)
-    name.when.value.matches(/.*raimohanska/)
 
-Now there's just
+You can also filter using `.where()`
 
-    x.is().equalTo("a")
-    x.is().in([1,2,3])
+    keyUps.map(".keyCode").where().equalTo(30)
+
+And there's negation
+
+    age.is().not().greaterThan(18)
+
 
