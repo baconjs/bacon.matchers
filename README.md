@@ -47,3 +47,9 @@ Complete examples:
 `truthy()` applies "truthy" matcher
 
 `not()` returns a negated `Matchers` object
+
+## Download / Install
+
+- Download [javascript file](https://raw.github.com/raimohanska/bacon.matchers/master/bacon.matchers.js)
+- NPM: registered as `bacon-matchers`
+- Bower: registered as `bacon-matchers`
