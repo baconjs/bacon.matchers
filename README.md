@@ -39,7 +39,11 @@ Complete examples:
 ## Matchers API
 
 `lessThan(x)` applies `<` matcher
+
 `greaterThan(x)` applies `>´ matcher
+
 `equalTo(x)` applies `==` matcher
+
 `truthy()` applies "truthy" matcher
+
 `not()` returns a negated `Matchers` object
