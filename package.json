@@ -9,6 +9,6 @@
     "coffee-script": "~1.6.3"
   },
   "scripts": {
-    "prepublish": "./build.sh"
+    "prepublish": "./build"
   }
 }
