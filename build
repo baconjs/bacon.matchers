@@ -1,1 +1,1 @@
-coffee -c bacon.matchers.coffee
+node_modules/coffee-script/bin/coffee -c bacon.matchers.coffee
