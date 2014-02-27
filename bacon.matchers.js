@@ -44,6 +44,9 @@
       context["truthy"] = apply1(function(a) {
         return !!a;
       });
+      context["match"] = apply2(function(val, pattern) {
+        return pattern.test(val);
+      });
       return context;
     };
     Bacon.Observable.prototype.is = function() {

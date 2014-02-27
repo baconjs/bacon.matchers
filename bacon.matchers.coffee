@@ -27,6 +27,9 @@ init = (Bacon) ->
     context["truthy"] = apply1((a) ->
       !!a
     )
+    context["match"] = apply2((val, pattern) ->
+      pattern.test val
+    )
     context
   Bacon.Observable::is = ->
     apply1 = (f) ->
