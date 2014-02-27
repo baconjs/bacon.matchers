@@ -1,13 +1,14 @@
 init = (Bacon) ->
-  addMatchers = (apply1, apply2) ->
-    context = addPositiveMatchers apply1, apply2
+  addMatchers = (apply1, apply2, apply3) ->
+    context = addPositiveMatchers apply1, apply2, apply3
     context["not"] = ->
       applyNot1 = (f) -> apply1 (a) -> not f(a)
       applyNot2 = (f) -> apply2 (a, b) -> not f(a, b)
-      addPositiveMatchers applyNot1, applyNot2
+      applyNot3 = (f) -> apply3 (val, a, b) -> not f(val, a, b)
+      addPositiveMatchers applyNot1, applyNot2, applyNot3
     context
 
-  addPositiveMatchers = (apply1, apply2) ->
+  addPositiveMatchers = (apply1, apply2, apply3) ->
     context = {}
     context["lessThan"] = apply2((a, b) ->
       a < b
@@ -30,6 +31,12 @@ init = (Bacon) ->
     context["match"] = apply2((val, pattern) ->
       pattern.test val
     )
+    context["inOpenRange"] = apply3((val, a, b) ->
+      a < val < b
+    )
+    context["inClosedRange"] = apply3((val, a, b) ->
+      a <= val <= b
+    )
     context
   Bacon.Observable::is = ->
     apply1 = (f) ->
@@ -41,8 +48,11 @@ init = (Bacon) ->
           observable.combine other, f
         else
           observable.map (val) -> f(val, other)
+    apply3 = (f) ->
+      (first, second) ->
+        observable.map (val) -> f(val, first, second)
     observable = this
-    addMatchers apply1, apply2
+    addMatchers apply1, apply2, apply3
 
   Bacon.Observable::where = ->
     apply1 = (f) ->
@@ -55,8 +65,11 @@ init = (Bacon) ->
           observable.filter isMatch
         else
           observable.filter (val) -> f(val, other)
+    apply3 = (f) ->
+      (first, second) ->
+        observable.filter (val) -> f(val, first, second)
     observable = this
-    addMatchers apply1, apply2
+    addMatchers apply1, apply2, apply3
 
 if module?
   Bacon = require("baconjs")
