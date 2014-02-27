@@ -12,8 +12,14 @@ init = (Bacon) ->
     context["lessThan"] = apply2((a, b) ->
       a < b
     )
+    context["lessThanOrEqualTo"] = apply2((a, b) ->
+      a <= b
+    )
     context["greaterThan"] = apply2((a, b) ->
       a > b
+    )
+    context["greaterThanOrEqualTo"] = apply2((a, b) ->
+      a >= b
     )
     context["equalTo"] = apply2((a, b) ->
       a is b

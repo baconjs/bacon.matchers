@@ -29,8 +29,14 @@
       context["lessThan"] = apply2(function(a, b) {
         return a < b;
       });
+      context["lessThanOrEqualTo"] = apply2(function(a, b) {
+        return a <= b;
+      });
       context["greaterThan"] = apply2(function(a, b) {
         return a > b;
+      });
+      context["greaterThanOrEqualTo"] = apply2(function(a, b) {
+        return a >= b;
       });
       context["equalTo"] = apply2(function(a, b) {
         return a === b;
