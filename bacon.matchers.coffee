@@ -70,6 +70,7 @@ init = (Bacon) ->
         observable.filter (val) -> f(val, first, second)
     observable = this
     addMatchers apply1, apply2, apply3
+  Bacon
 
 if module?
   Bacon = require("baconjs")

@@ -88,7 +88,7 @@
       observable = this;
       return addMatchers(apply1, apply2, apply3);
     };
-    return Bacon.Observable.prototype.where = function() {
+    Bacon.Observable.prototype.where = function() {
       var apply1, apply2, apply3, observable;
       apply1 = function(f) {
         return function() {
@@ -118,6 +118,7 @@
       observable = this;
       return addMatchers(apply1, apply2, apply3);
     };
+    return Bacon;
   };
 
   if (typeof module !== "undefined" && module !== null) {
