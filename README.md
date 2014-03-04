@@ -40,11 +40,21 @@ Complete examples:
 
 `lessThan(x)` applies `<` matcher
 
-`greaterThan(x)` applies `>´ matcher
+`lessThanOrEqualTo(x)` applies `<=` matcher
+
+`greaterThan(x)` applies `>` matcher
+
+`greaterThanOrEqualTo` applies `>=` matcher
+
+`inClosedRange(a, b)` applies `[a..b]` range matcher
+
+`inOpenRange(a, b)` applies `(a..b)` range matcher
 
 `equalTo(x)` applies `==` matcher
 
 `truthy()` applies "truthy" matcher
+
+`match(expr)` applies `regular expression` matcher
 
 `not()` returns a negated `Matchers` object
 
