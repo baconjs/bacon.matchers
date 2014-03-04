@@ -4,11 +4,11 @@
 
   init = function(Bacon) {
     var addMatchers, addPositiveMatchers;
-    addMatchers = function(apply1, apply2) {
+    addMatchers = function(apply1, apply2, apply3) {
       var context;
-      context = addPositiveMatchers(apply1, apply2);
+      context = addPositiveMatchers(apply1, apply2, apply3);
       context["not"] = function() {
-        var applyNot1, applyNot2;
+        var applyNot1, applyNot2, applyNot3;
         applyNot1 = function(f) {
           return apply1(function(a) {
             return !f(a);
@@ -19,18 +19,29 @@
             return !f(a, b);
           });
         };
-        return addPositiveMatchers(applyNot1, applyNot2);
+        applyNot3 = function(f) {
+          return apply3(function(val, a, b) {
+            return !f(val, a, b);
+          });
+        };
+        return addPositiveMatchers(applyNot1, applyNot2, applyNot3);
       };
       return context;
     };
-    addPositiveMatchers = function(apply1, apply2) {
+    addPositiveMatchers = function(apply1, apply2, apply3) {
       var context;
       context = {};
       context["lessThan"] = apply2(function(a, b) {
         return a < b;
       });
+      context["lessThanOrEqualTo"] = apply2(function(a, b) {
+        return a <= b;
+      });
       context["greaterThan"] = apply2(function(a, b) {
         return a > b;
+      });
+      context["greaterThanOrEqualTo"] = apply2(function(a, b) {
+        return a >= b;
       });
       context["equalTo"] = apply2(function(a, b) {
         return a === b;
@@ -38,10 +49,19 @@
       context["truthy"] = apply1(function(a) {
         return !!a;
       });
+      context["match"] = apply2(function(val, pattern) {
+        return pattern.test(val);
+      });
+      context["inOpenRange"] = apply3(function(val, a, b) {
+        return (a < val && val < b);
+      });
+      context["inClosedRange"] = apply3(function(val, a, b) {
+        return (a <= val && val <= b);
+      });
       return context;
     };
     Bacon.Observable.prototype.is = function() {
-      var apply1, apply2, observable;
+      var apply1, apply2, apply3, observable;
       apply1 = function(f) {
         return function() {
           return observable.map(f);
@@ -58,11 +78,18 @@
           }
         };
       };
+      apply3 = function(f) {
+        return function(first, second) {
+          return observable.map(function(val) {
+            return f(val, first, second);
+          });
+        };
+      };
       observable = this;
-      return addMatchers(apply1, apply2);
+      return addMatchers(apply1, apply2, apply3);
     };
-    return Bacon.Observable.prototype.where = function() {
-      var apply1, apply2, observable;
+    Bacon.Observable.prototype.where = function() {
+      var apply1, apply2, apply3, observable;
       apply1 = function(f) {
         return function() {
           return observable.filter(f);
@@ -81,9 +108,17 @@
           }
         };
       };
+      apply3 = function(f) {
+        return function(first, second) {
+          return observable.filter(function(val) {
+            return f(val, first, second);
+          });
+        };
+      };
       observable = this;
-      return addMatchers(apply1, apply2);
+      return addMatchers(apply1, apply2, apply3);
     };
+    return Bacon;
   };
 
   if (typeof module !== "undefined" && module !== null) {
