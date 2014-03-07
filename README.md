@@ -63,3 +63,7 @@ Complete examples:
 - Download [javascript file](https://raw.github.com/raimohanska/bacon.matchers/master/bacon.matchers.js)
 - NPM: registered as `bacon.matchers`
 - Bower: registered as `bacon.matchers`
+
+## Tests
+
+Tests are located in the spec directory. You can run them by installing dependencies with `npm install` and then executing the `run-tests` script.
