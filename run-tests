@@ -1,1 +1,1 @@
-mocha --require coffee-script --compilers coffee:coffee-script/register spec/bacon.matchers.spec.coffee
+node_modules/mocha/bin/mocha --require coffee-script --compilers coffee:coffee-script/register spec/bacon.matchers.spec.coffee
