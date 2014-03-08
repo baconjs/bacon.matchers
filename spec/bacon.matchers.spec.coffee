@@ -5,8 +5,34 @@ assertConstantly = (expectedValue, stream, done) ->
   stream.onValue (val) -> assert.equal expectedValue, val
   stream.onEnd done
 
+assertValues = (expectedValues, stream, done) ->
+  foldedValues = stream.fold [], (values, newValue) ->
+    values.concat(newValue)
+  foldedValues.onValue (receivedValues) ->
+    assert.deepEqual expectedValues, receivedValues
+  foldedValues.onEnd ->
+    done()
+
 describe 'bacon.matchers', ->
-  describe '#is()', ->
+  describe 'structure', ->
+    it 'should return same matchers for is and where', ->
+      stream = Bacon.once(1)
+      isMatchers = Object.keys(stream.is()).join()
+      whereMatchers = Object.keys(stream.where()).join()
+      assert.equal isMatchers, whereMatchers
+  describe 'basic functionality', ->
+    it 'should map to booleans with is()', (done) ->
+      stream = Bacon.fromArray([1, 2, 1, 3]).is().equalTo(1)
+      assertValues [true, false, true, false], stream, done
+    it 'should filter with when()', (done) ->
+      stream = Bacon.fromArray(["hey", "Hi", "ho", "HoWdy"]).where().match(/^[a-z]+$/)
+      assertValues ["hey", "ho"], stream, done
+  describe 'matchers', ->
+    describe 'equalTo', ->
+      it 'compares equal values correctly', (done) ->
+        strs = ["bacon.js", "ponyfood.js"]
+        stream = Bacon.fromArray(strs).is().equalTo("ponyfood.js")
+        assertValues [false, true], stream, done
     describe 'lessThanOrEqualTo', ->
       it '5 <= 5', (done) ->
         stream = Bacon.once(5).is().lessThanOrEqualTo(5)
