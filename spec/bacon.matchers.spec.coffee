@@ -1,5 +1,5 @@
 assert = require("assert")
-Bacon = require("../bacon.matchers")
+Bacon = require("../bacon.matchers.js") # Test the result of the build
 
 assertConstantly = (expectedValue, stream, done) ->
   stream.onValue (val) -> assert.equal expectedValue, val
