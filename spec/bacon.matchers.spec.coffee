@@ -102,6 +102,11 @@ describe 'bacon.matchers', ->
             alien: 'morninglightmountain'
           stream = Bacon.once(object).is().containerOf(object)
           assertConstantly true, stream, done
+        it 'should return false when key matches but value does not', (done) ->
+          stream = Bacon.once(
+            alien: 'morninglightmountain'
+          ).is().containerOf(alien: 't1000')
+          assertConstantly false, stream, done
         it 'should return false when the object contains a subset of the compared value', (done) ->
           stream = Bacon.once(
             alien: 'morninglightmountain'
