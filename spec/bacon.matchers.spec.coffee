@@ -1,5 +1,5 @@
 assert = require("assert")
-Bacon = require("../bacon.matchers")
+Bacon = require("../bacon.matchers.js") # Test the result of the build
 
 assertConstantly = (expectedValue, stream, done) ->
   stream.onValue (val) -> assert.equal expectedValue, val
@@ -75,4 +75,64 @@ describe 'bacon.matchers', ->
       it 'should return false with values not within range', (done) ->
         stream = Bacon.fromArray([6,20]).is().inClosedRange(7, 19)
         assertConstantly false, stream, done
-
+    describe 'containerOf', ->
+      context 'value is an array', ->
+        it 'should return true when the array contains the element', (done) ->
+          stream = Bacon.once([6]).is().containerOf(6)
+          assertConstantly true, stream, done
+        it 'should return false when the array does not contain the element', (done) ->
+          stream = Bacon.once([66]).is().containerOf(6)
+          assertConstantly false, stream, done
+      context 'value is a string', ->
+        it 'should return true when the string contains the sub-string', (done) ->
+          stream = Bacon.once('hello bacon').is().containerOf('bacon')
+          assertConstantly true, stream, done
+        it 'should return false when the string does not contain the sub-string', (done) ->
+          stream = Bacon.once('hello bacon').is().containerOf('Bacon')
+          assertConstantly false, stream, done
+      context 'value is an object', ->
+        it 'should return true when the object contains the key-value pair', (done) ->
+          stream = Bacon.once({
+            alien: 'morninglightmountain'
+            human: 'dudleybose'
+          }).is().containerOf({alien: 'morninglightmountain'})
+          assertConstantly true, stream, done
+        it 'should return true when comparing equal objects', (done) ->
+          object =
+            alien: 'morninglightmountain'
+          stream = Bacon.once(object).is().containerOf(object)
+          assertConstantly true, stream, done
+        it 'should return false when key matches but value does not', (done) ->
+          stream = Bacon.once(
+            alien: 'morninglightmountain'
+          ).is().containerOf(alien: 't1000')
+          assertConstantly false, stream, done
+        it 'should return false when the object contains a subset of the compared value', (done) ->
+          stream = Bacon.once(
+            alien: 'morninglightmountain'
+          ).is().containerOf(
+            alien: 'morninglightmountain'
+            human: 'dudleybose'
+          )
+          assertConstantly false, stream, done
+        it 'should return false when comparing a non-empty object to {}', (done) ->
+          stream = Bacon.once(
+            alien: 'morninglightmountain'
+          ).is().containerOf( {} )
+          assertConstantly false, stream, done
+        it 'should return false when comparing {} to {}', (done) ->
+          stream = Bacon.once( {} ).is().containerOf( {} )
+          assertConstantly false, stream, done
+      context 'value is a boolean', ->
+        it 'should always return false', (done) ->
+          stream = Bacon.once(false).is().containerOf(false)
+          assertConstantly false, stream, done
+      context 'value is a number', ->
+        it 'should always return false', (done) ->
+          stream = Bacon.once(1).is().containerOf(1)
+          assertConstantly false, stream, done
+      context 'value is a function', ->
+        it 'should always return false', (done) ->
+          fun = ->
+          stream = Bacon.once(fun).is().containerOf(fun)
+          assertConstantly false, stream, done

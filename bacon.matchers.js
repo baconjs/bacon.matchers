@@ -58,6 +58,26 @@
       context["inClosedRange"] = apply3(function(val, a, b) {
         return (a <= val && val <= b);
       });
+      context["containerOf"] = apply2(function(a, b) {
+        var aHasAllKeyValuesOfB, bIsNotEmpty, matchingKeyValuePairs;
+        if (a instanceof Array || typeof a === 'string') {
+          return a.indexOf(b) >= 0;
+        } else if (typeof a === 'object') {
+          matchingKeyValuePairs = 0;
+          Object.keys(b).forEach(function(bKey) {
+            var aHasBKeyAndValue;
+            aHasBKeyAndValue = a.hasOwnProperty(bKey) && a[bKey] === b[bKey];
+            if (aHasBKeyAndValue) {
+              return matchingKeyValuePairs += 1;
+            }
+          });
+          aHasAllKeyValuesOfB = matchingKeyValuePairs === Object.keys(b).length;
+          bIsNotEmpty = Object.keys(b).length > 0;
+          return aHasAllKeyValuesOfB && bIsNotEmpty;
+        } else {
+          return false;
+        }
+      });
       return context;
     };
     Bacon.Observable.prototype.is = function() {
