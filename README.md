@@ -14,20 +14,20 @@ You can also filter using `.where()`
 And there's negation
 
     age.is().not().greaterThan(18)
-    
+
 You can compare to either constant values or other Observables. Like
 
     // Returns a Property of Booleans
-    var collision = playerPos.is().equalTo(monsterPos)    
-    
+    var collision = playerPos.is().equalTo(monsterPos)
+
 Complete examples:
 
     Bacon.fromArray([1,2,3]).is().equalTo(2)
-    
+
     => false, true, false
-    
+
     Bacon.fromArray([1,2,3]).where().equalTo(2)
-    
+
     => 2
 
 ## Additions to Observable API
