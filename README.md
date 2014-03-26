@@ -4,7 +4,7 @@ You can map a Property / EventStream to a `boolean` one like using `.is()`
 
     // Returns a Property of Booleans
     age.is().equalTo(65)
-    salary.is.greaterThan(1000)
+    salary.is().greaterThan(1000)
 
 You can also filter using `.where()`
 
