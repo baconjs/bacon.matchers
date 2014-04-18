@@ -1,4 +1,17 @@
 init = (Bacon) ->
+  toFieldExtractor = (f) ->
+    parts = f.slice(1).split(".")
+    partFuncs = Bacon._.map(toSimpleExtractor, parts)
+    (value) ->
+      for f in partFuncs
+        value = f(value)
+      value
+  toSimpleExtractor = (key) -> (value) ->
+    if not value?
+      undefined
+    else
+      value[key]
+
   addMatchers = (apply1, apply2, apply3) ->
     context = addPositiveMatchers apply1, apply2, apply3
     context["not"] = ->
@@ -69,21 +82,24 @@ init = (Bacon) ->
     observable = this
     addMatchers apply1, apply2, apply3
 
-  Bacon.Observable::where = ->
+  Bacon.Observable::where = (fieldKey) ->
+    field = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
+
     apply1 = (f) ->
       ->
-        observable.filter f
+        observable.filter (val) -> f(field(val))
     apply2 = (f) ->
       (other) ->
         if other instanceof Bacon.Observable
-          isMatch = observable.combine(other, f)
+          isMatch = observable.combine(other, (val, other) -> f(field(val), other))
           observable.filter isMatch
         else
-          observable.filter (val) -> f(val, other)
+          observable.filter (val) -> f(field(val), other)
     apply3 = (f) ->
       (first, second) ->
-        observable.filter (val) -> f(val, first, second)
+        observable.filter (val) -> f(field(val), first, second)
     observable = this
+    
     addMatchers apply1, apply2, apply3
   Bacon
 

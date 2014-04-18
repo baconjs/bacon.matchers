@@ -24,9 +24,21 @@ describe 'bacon.matchers', ->
     it 'should map to booleans with is()', (done) ->
       stream = Bacon.fromArray([1, 2, 1, 3]).is().equalTo(1)
       assertValues [true, false, true, false], stream, done
-    it 'should filter with when()', (done) ->
+    it 'should filter with where()', (done) ->
       stream = Bacon.fromArray(["hey", "Hi", "ho", "HoWdy"]).where().match(/^[a-z]+$/)
       assertValues ["hey", "ho"], stream, done
+    it 'should filter by key with where(".key")', (done) ->
+      stream = Bacon.fromArray([
+        {title: 'The Machine',     tags: ['SciFi', 'Thriller']},
+        {title: 'Captain America', tags: ['SciFi', 'Action']},
+        {title: 'The Hobbit',      tags: ['Fantasy', 'Adventure']},
+        {title: 'Frozen',          tags: ['Family', 'Adventure']}]
+      ).where('.tags').containerOf('SciFi')
+
+      assertValues [
+        {title: 'The Machine',     tags: ['SciFi', 'Thriller']},
+        {title: 'Captain America', tags: ['SciFi', 'Action']}
+      ], stream, done
   describe 'matchers', ->
     describe 'equalTo', ->
       it 'compares equal values correctly', (done) ->

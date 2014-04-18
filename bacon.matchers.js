@@ -3,7 +3,29 @@
   var Bacon, init;
 
   init = function(Bacon) {
-    var addMatchers, addPositiveMatchers;
+    var addMatchers, addPositiveMatchers, toFieldExtractor, toSimpleExtractor;
+    toFieldExtractor = function(f) {
+      var partFuncs, parts;
+      parts = f.slice(1).split(".");
+      partFuncs = Bacon._.map(toSimpleExtractor, parts);
+      return function(value) {
+        var _i, _len;
+        for (_i = 0, _len = partFuncs.length; _i < _len; _i++) {
+          f = partFuncs[_i];
+          value = f(value);
+        }
+        return value;
+      };
+    };
+    toSimpleExtractor = function(key) {
+      return function(value) {
+        if (value == null) {
+          return void 0;
+        } else {
+          return value[key];
+        }
+      };
+    };
     addMatchers = function(apply1, apply2, apply3) {
       var context;
       context = addPositiveMatchers(apply1, apply2, apply3);
@@ -108,22 +130,27 @@
       observable = this;
       return addMatchers(apply1, apply2, apply3);
     };
-    Bacon.Observable.prototype.where = function() {
-      var apply1, apply2, apply3, observable;
+    Bacon.Observable.prototype.where = function(fieldKey) {
+      var apply1, apply2, apply3, field, observable;
+      field = fieldKey != null ? toFieldExtractor(fieldKey) : Bacon._.id;
       apply1 = function(f) {
         return function() {
-          return observable.filter(f);
+          return observable.filter(function(val) {
+            return f(field(val));
+          });
         };
       };
       apply2 = function(f) {
         return function(other) {
           var isMatch;
           if (other instanceof Bacon.Observable) {
-            isMatch = observable.combine(other, f);
+            isMatch = observable.combine(other, function(val, other) {
+              return f(field(val), other);
+            });
             return observable.filter(isMatch);
           } else {
             return observable.filter(function(val) {
-              return f(val, other);
+              return f(field(val), other);
             });
           }
         };
@@ -131,7 +158,7 @@
       apply3 = function(f) {
         return function(first, second) {
           return observable.filter(function(val) {
-            return f(val, first, second);
+            return f(field(val), first, second);
           });
         };
       };
