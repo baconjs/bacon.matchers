@@ -66,19 +66,21 @@ init = (Bacon) ->
         false
     )
     context
-  Bacon.Observable::is = ->
+  Bacon.Observable::is = (fieldKey) ->
+    field = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
+
     apply1 = (f) ->
       ->
-        observable.map f
+        observable.map (val) -> f(field(val))
     apply2 = (f) ->
       (other) ->
         if other instanceof Bacon.Observable
-          observable.combine other, f
+          observable.combine other, (val, other) -> f(field(val), other)
         else
-          observable.map (val) -> f(val, other)
+          observable.map (val) -> f(field(val), other)
     apply3 = (f) ->
       (first, second) ->
-        observable.map (val) -> f(val, first, second)
+        observable.map (val) -> f(field(val), first, second)
     observable = this
     addMatchers apply1, apply2, apply3
 

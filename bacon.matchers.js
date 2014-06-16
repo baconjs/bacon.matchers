@@ -102,20 +102,25 @@
       });
       return context;
     };
-    Bacon.Observable.prototype.is = function() {
-      var apply1, apply2, apply3, observable;
+    Bacon.Observable.prototype.is = function(fieldKey) {
+      var apply1, apply2, apply3, field, observable;
+      field = fieldKey != null ? toFieldExtractor(fieldKey) : Bacon._.id;
       apply1 = function(f) {
         return function() {
-          return observable.map(f);
+          return observable.map(function(val) {
+            return f(field(val));
+          });
         };
       };
       apply2 = function(f) {
         return function(other) {
           if (other instanceof Bacon.Observable) {
-            return observable.combine(other, f);
+            return observable.combine(other, function(val, other) {
+              return f(field(val), other);
+            });
           } else {
             return observable.map(function(val) {
-              return f(val, other);
+              return f(field(val), other);
             });
           }
         };
@@ -123,7 +128,7 @@
       apply3 = function(f) {
         return function(first, second) {
           return observable.map(function(val) {
-            return f(val, first, second);
+            return f(field(val), first, second);
           });
         };
       };

@@ -39,6 +39,14 @@ describe 'bacon.matchers', ->
         {title: 'The Machine',     tags: ['SciFi', 'Thriller']},
         {title: 'Captain America', tags: ['SciFi', 'Action']}
       ], stream, done
+    it 'should map by key with is(".key)"', (done) ->
+      isValid = Bacon.fromArray([
+        {title: 'The Godfather',            tags: ['Crime', 'Drama']},
+        {title: 'Europa Report',            tags: ['SciFi']},
+        {title: 'The Grand Budapest Hotel', tags: []}]
+      ).is('.tags.length').greaterThan(0)
+      
+      assertValues [true, true, false], isValid, done
   describe 'matchers', ->
     describe 'equalTo', ->
       it 'compares equal values correctly', (done) ->
