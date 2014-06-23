@@ -3,7 +3,7 @@
   var Bacon, init;
 
   init = function(Bacon) {
-    var addMatchers, addPositiveMatchers, toFieldExtractor, toSimpleExtractor;
+    var addMatchers, addPositiveMatchers, asMatchers, toFieldExtractor, toSimpleExtractor;
     toFieldExtractor = function(f) {
       var partFuncs, parts;
       parts = f.slice(1).split(".");
@@ -102,12 +102,12 @@
       });
       return context;
     };
-    Bacon.Observable.prototype.is = function(fieldKey) {
-      var apply1, apply2, apply3, field, observable;
+    asMatchers = function(operation, combinator, fieldKey) {
+      var apply1, apply2, apply3, field;
       field = fieldKey != null ? toFieldExtractor(fieldKey) : Bacon._.id;
       apply1 = function(f) {
         return function() {
-          return observable.map(function(val) {
+          return operation(function(val) {
             return f(field(val));
           });
         };
@@ -115,11 +115,11 @@
       apply2 = function(f) {
         return function(other) {
           if (other instanceof Bacon.Observable) {
-            return observable.combine(other, function(val, other) {
+            return combinator(other, function(val, other) {
               return f(field(val), other);
             });
           } else {
-            return observable.map(function(val) {
+            return operation(function(val) {
               return f(field(val), other);
             });
           }
@@ -127,48 +127,34 @@
       };
       apply3 = function(f) {
         return function(first, second) {
-          return observable.map(function(val) {
+          return operation(function(val) {
             return f(field(val), first, second);
           });
         };
       };
-      observable = this;
       return addMatchers(apply1, apply2, apply3);
     };
+    Bacon.Observable.prototype.is = function(fieldKey) {
+      var combinator, context, operation;
+      context = this;
+      operation = function(f) {
+        return context.map(f);
+      };
+      combinator = function(observable, f) {
+        return context.combine(observable, f);
+      };
+      return asMatchers(operation, combinator, fieldKey);
+    };
     Bacon.Observable.prototype.where = function(fieldKey) {
-      var apply1, apply2, apply3, field, observable;
-      field = fieldKey != null ? toFieldExtractor(fieldKey) : Bacon._.id;
-      apply1 = function(f) {
-        return function() {
-          return observable.filter(function(val) {
-            return f(field(val));
-          });
-        };
+      var combinator, context, operation;
+      context = this;
+      operation = function(f) {
+        return context.filter(f);
       };
-      apply2 = function(f) {
-        return function(other) {
-          var isMatch;
-          if (other instanceof Bacon.Observable) {
-            isMatch = observable.combine(other, function(val, other) {
-              return f(field(val), other);
-            });
-            return observable.filter(isMatch);
-          } else {
-            return observable.filter(function(val) {
-              return f(field(val), other);
-            });
-          }
-        };
+      combinator = function(observable, f) {
+        return context.filter(context.combine(observable, f));
       };
-      apply3 = function(f) {
-        return function(first, second) {
-          return observable.filter(function(val) {
-            return f(field(val), first, second);
-          });
-        };
-      };
-      observable = this;
-      return addMatchers(apply1, apply2, apply3);
+      return asMatchers(operation, combinator, fieldKey);
     };
     return Bacon;
   };
