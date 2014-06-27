@@ -20,6 +20,22 @@ You can compare to either constant values or other Observables. Like
     // Returns a Property of Booleans
     var collision = playerPos.is().equalTo(monsterPos)
 
+You can give field extractor strings to .where() and .is(), like this:
+
+	Bacon.fromArray([
+		{ name: "2001: A Space Odyssey", tags: ["SciFi"] },
+		{ name: "The Godfather", tags: ["Crime", "Drama"] },
+	]).where('.tags').containerOf("SciFi")
+
+	=> { name: "2001: A Space Odyssey", tags: ["SciFi"] }
+
+	Bacon.fromArray([
+		{ name: "2001: A Space Odyssey", tags: ["SciFi"] },
+		{ name: "The Godfather", tags: ["Crime", "Drama"] },
+	]).is('.tags.length').greaterThan(1)
+
+	=> false, true
+
 Complete examples:
 
     Bacon.fromArray([1,2,3]).is().equalTo(2)
