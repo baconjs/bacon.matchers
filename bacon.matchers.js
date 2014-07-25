@@ -3,7 +3,7 @@
   var Bacon, init;
 
   init = function(Bacon) {
-    var addMatchers, addPositiveMatchers, asMatchers, toFieldExtractor, toSimpleExtractor;
+    var addMatchers, addPositiveMatchers, asMatchers, contains, toFieldExtractor, toSimpleExtractor;
     toFieldExtractor = function(f) {
       var partFuncs, parts;
       parts = f.slice(1).split(".");
@@ -25,6 +25,26 @@
           return value[key];
         }
       };
+    };
+    contains = function(container, item) {
+      var contoainerHasAllKeyValuesOfItem, itemIsNotEmpty, matchingKeyValuePairs;
+      if (container instanceof Array || typeof container === 'string') {
+        return container.indexOf(item) >= 0;
+      } else if (typeof container === 'object') {
+        matchingKeyValuePairs = 0;
+        Object.keys(item).forEach(function(bKey) {
+          var containerHasItemKeyAndValue;
+          containerHasItemKeyAndValue = container.hasOwnProperty(bKey) && container[bKey] === item[bKey];
+          if (containerHasItemKeyAndValue) {
+            return matchingKeyValuePairs += 1;
+          }
+        });
+        contoainerHasAllKeyValuesOfItem = matchingKeyValuePairs === Object.keys(item).length;
+        itemIsNotEmpty = Object.keys(item).length > 0;
+        return contoainerHasAllKeyValuesOfItem && itemIsNotEmpty;
+      } else {
+        return false;
+      }
     };
     addMatchers = function(apply1, apply2, apply3) {
       var context;
@@ -81,24 +101,10 @@
         return (a <= val && val <= b);
       });
       context["containerOf"] = apply2(function(a, b) {
-        var aHasAllKeyValuesOfB, bIsNotEmpty, matchingKeyValuePairs;
-        if (a instanceof Array || typeof a === 'string') {
-          return a.indexOf(b) >= 0;
-        } else if (typeof a === 'object') {
-          matchingKeyValuePairs = 0;
-          Object.keys(b).forEach(function(bKey) {
-            var aHasBKeyAndValue;
-            aHasBKeyAndValue = a.hasOwnProperty(bKey) && a[bKey] === b[bKey];
-            if (aHasBKeyAndValue) {
-              return matchingKeyValuePairs += 1;
-            }
-          });
-          aHasAllKeyValuesOfB = matchingKeyValuePairs === Object.keys(b).length;
-          bIsNotEmpty = Object.keys(b).length > 0;
-          return aHasAllKeyValuesOfB && bIsNotEmpty;
-        } else {
-          return false;
-        }
+        return contains(a, b);
+      });
+      context["memberOf"] = apply2(function(a, b) {
+        return contains(b, a);
       });
       return context;
     };

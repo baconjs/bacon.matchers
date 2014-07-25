@@ -156,3 +156,64 @@ describe 'bacon.matchers', ->
           fun = ->
           stream = Bacon.once(fun).is().containerOf(fun)
           assertConstantly false, stream, done
+    describe 'memberOf', ->
+      context 'matcher is an array', ->
+        it 'should return true when the array contains the element', (done) ->
+          stream = Bacon.once(6).is().memberOf([6])
+          assertConstantly true, stream, done
+        it 'should return false when the array does not contain the element', (done) ->
+          stream = Bacon.once(66).is().memberOf([6])
+          assertConstantly false, stream, done
+      context 'matcher is a string', ->
+        it 'should return true when the string contains the sub-string', (done) ->
+          stream = Bacon.once('bacon').is().memberOf('hello bacon')
+          assertConstantly true, stream, done
+        it 'should return false when the string does not contain the sub-string', (done) ->
+          stream = Bacon.once('Bacon').is().memberOf('hello bacon')
+          assertConstantly false, stream, done
+      context 'matcher is an object', ->
+        it 'should return true when the object contains the key-value pair', (done) ->
+          stream = Bacon.once({ alien: 'morninglightmountain' }).is().memberOf({
+            alien: 'morninglightmountain'
+            human: 'dudleybose'
+          })
+          assertConstantly true, stream, done
+        it 'should return true when comparing equal objects', (done) ->
+          object =
+            alien: 'morninglightmountain'
+          stream = Bacon.once(object).is().memberOf(object)
+          assertConstantly true, stream, done
+        it 'should return false when key matches but value does not', (done) ->
+          stream = Bacon.once(
+            alien: 'morninglightmountain'
+          ).is().memberOf(alien: 't1000')
+          assertConstantly false, stream, done
+        it 'should return false when the object contains a subset of the compared value', (done) ->
+          stream = Bacon.once(
+            alien: 'morninglightmountain'
+            human: 'dudleybose'
+          ).is().memberOf(
+            alien: 'morninglightmountain'
+          )
+          assertConstantly false, stream, done
+        it 'should return false when comparing a non-empty object to {}', (done) ->
+          stream = Bacon.once({}).is().memberOf(
+            alien: 'morninglightmountain'
+          )
+          assertConstantly false, stream, done
+        it 'should return false when comparing {} to {}', (done) ->
+          stream = Bacon.once( {} ).is().memberOf( {} )
+          assertConstantly false, stream, done
+      context 'matcher is a boolean', ->
+        it 'should always return false', (done) ->
+          stream = Bacon.once(false).is().memberOf(false)
+          assertConstantly false, stream, done
+      context 'matcher is a number', ->
+        it 'should always return false', (done) ->
+          stream = Bacon.once(1).is().memberOf(1)
+          assertConstantly false, stream, done
+      context 'matcher is a function', ->
+        it 'should always return false', (done) ->
+          fun = ->
+          stream = Bacon.once(fun).is().memberOf(fun)
+          assertConstantly false, stream, done
