@@ -74,18 +74,28 @@ Complete examples:
 
 `not()` returns a negated `Matchers` object
 
-`containerOf(x)` supports arrays, strings and object key-values. Examples:
+
+`containerOf(x)` and `memberOf(x)` support arrays, strings and object key-values. Examples:
 
 ```javascript
 stream = Bacon.once([6]).is().containerOf(6) // is true
+stream = Bacon.once(6).is().memberOf([6]) // is true
 
 Bacon.once('hello bacon').is().containerOf('bacon') // is true
+Bacon.once('bacon').is().memberOf('hello bacon') // is true
 
 Bacon.once({
   alien: 'morninglightmountain'
   human: 'dudleybose'
 }).is().containerOf({ alien: 'morninglightmountain' }) // is true
+
+Bacon.once({ alien: 'morninglightmountain' })
+  .is().memberOf({
+  alien: 'morninglightmountain'
+  human: 'dudleybose'
+}) // is true
 ```
+
 
 ## Browser support
 

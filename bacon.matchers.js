@@ -27,7 +27,7 @@
       };
     };
     contains = function(container, item) {
-      var contoainerHasAllKeyValuesOfItem, itemIsNotEmpty, matchingKeyValuePairs;
+      var containerHasAllKeyValuesOfItem, itemIsNotEmpty, matchingKeyValuePairs;
       if (container instanceof Array || typeof container === 'string') {
         return container.indexOf(item) >= 0;
       } else if (typeof container === 'object') {
@@ -39,9 +39,9 @@
             return matchingKeyValuePairs += 1;
           }
         });
-        contoainerHasAllKeyValuesOfItem = matchingKeyValuePairs === Object.keys(item).length;
+        containerHasAllKeyValuesOfItem = matchingKeyValuePairs === Object.keys(item).length;
         itemIsNotEmpty = Object.keys(item).length > 0;
-        return contoainerHasAllKeyValuesOfItem && itemIsNotEmpty;
+        return containerHasAllKeyValuesOfItem && itemIsNotEmpty;
       } else {
         return false;
       }

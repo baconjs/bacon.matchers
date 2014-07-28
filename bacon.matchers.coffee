@@ -20,9 +20,9 @@ init = (Bacon) ->
         containerHasItemKeyAndValue = container.hasOwnProperty(bKey) and container[bKey] == item[bKey]
         if containerHasItemKeyAndValue
           matchingKeyValuePairs += 1
-      contoainerHasAllKeyValuesOfItem = matchingKeyValuePairs == Object.keys(item).length
+      containerHasAllKeyValuesOfItem = matchingKeyValuePairs == Object.keys(item).length
       itemIsNotEmpty = Object.keys(item).length > 0
-      contoainerHasAllKeyValuesOfItem and itemIsNotEmpty
+      containerHasAllKeyValuesOfItem and itemIsNotEmpty
     else
       false
 
