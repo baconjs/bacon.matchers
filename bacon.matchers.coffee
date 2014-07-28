@@ -11,6 +11,21 @@ init = (Bacon) ->
       undefined
     else
       value[key]
+  contains = (container, item) ->
+    if container instanceof Array or typeof container == 'string'
+      container.indexOf(item) >= 0
+    else if typeof container == 'object'
+      matchingKeyValuePairs = 0
+      Object.keys(item).forEach (bKey) -> # Object.keys works in IE9 and above
+        containerHasItemKeyAndValue = container.hasOwnProperty(bKey) and container[bKey] == item[bKey]
+        if containerHasItemKeyAndValue
+          matchingKeyValuePairs += 1
+      containerHasAllKeyValuesOfItem = matchingKeyValuePairs == Object.keys(item).length
+      itemIsNotEmpty = Object.keys(item).length > 0
+      containerHasAllKeyValuesOfItem and itemIsNotEmpty
+    else
+      false
+
 
   addMatchers = (apply1, apply2, apply3) ->
     context = addPositiveMatchers apply1, apply2, apply3
@@ -51,20 +66,12 @@ init = (Bacon) ->
       a <= val <= b
     )
     context["containerOf"] = apply2((a, b) ->
-      if a instanceof Array or typeof a == 'string'
-        a.indexOf(b) >= 0
-      else if typeof a == 'object'
-        matchingKeyValuePairs = 0
-        Object.keys(b).forEach (bKey) -> # Object.keys works in IE9 and above
-          aHasBKeyAndValue = a.hasOwnProperty(bKey) and a[bKey] == b[bKey]
-          if aHasBKeyAndValue
-            matchingKeyValuePairs += 1
-        aHasAllKeyValuesOfB = matchingKeyValuePairs == Object.keys(b).length
-        bIsNotEmpty = Object.keys(b).length > 0
-        aHasAllKeyValuesOfB and bIsNotEmpty
-      else
-        false
+      contains(a,b)
     )
+    context["memberOf"] = apply2((a, b) ->
+      contains(b,a)
+    )
+
     context
   asMatchers = (operation, combinator, fieldKey) ->
         field = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
