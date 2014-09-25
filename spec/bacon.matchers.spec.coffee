@@ -217,3 +217,31 @@ describe 'bacon.matchers', ->
           fun = ->
           stream = Bacon.once(fun).is().memberOf(fun)
           assertConstantly false, stream, done
+    describe 'every', ->
+      it 'should match all clauses', (done) -> 
+        stream = Bacon.fromArray([
+          { power_pill: true,   ghosts: ["Inky", "Pinky"]},
+          { power_pill: false,  ghosts: ["Inky", "Pinky", "Blinky", "Clyde"]},
+          { power_pill: false,  ghosts: ["Blinky", "Clyde"]},
+          { power_pill: true,   ghosts: ["Clyde"]}
+        ])
+        matches = stream.delay(0).is().every(
+          (s) -> s.is(".ghosts").containerOf("Inky"),
+          (s) -> s.map(".power_pill").not()
+        )
+
+        assertValues [false, true, false, false], matches, done
+    describe 'some', ->
+      it 'should match any clause', (done) ->
+        stream = Bacon.fromArray([
+          { power_pill: true,   ghosts: ["Inky", "Pinky"]},
+          { power_pill: false,  ghosts: ["Inky", "Pinky", "Blinky", "Clyde"]},
+          { power_pill: false,  ghosts: ["Blinky", "Clyde"]},
+          { power_pill: true,   ghosts: ["Clyde"]}
+        ])
+        matches = stream.delay(0).is().some(
+          (s) -> s.is(".ghosts").containerOf("Inky"),
+          (s) -> s.map(".power_pill").not()
+        )
+
+        assertValues [true, true, true, false], matches, done

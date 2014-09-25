@@ -71,33 +71,42 @@ init = (Bacon) ->
     context["memberOf"] = apply2((a, b) ->
       contains(b,a)
     )
-
     context
-  asMatchers = (operation, combinator, fieldKey) ->
-        field = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
-        apply1 = (f) ->
-          ->
-            operation (val) -> f(field(val))
-        apply2 = (f) ->
-          (other) ->
-            if other instanceof Bacon.Observable
-              combinator other, (val, other) -> f(field(val), other)
-            else
-              operation (val) -> f(field(val), other)
-        apply3 = (f) ->
-          (first, second) ->
-            operation (val) -> f(field(val), first, second)
-        addMatchers apply1, apply2, apply3
+
+  asMatchers = (stream, operation, combinator, fieldKey) ->
+    field = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
+    apply1 = (f) ->
+      ->
+        operation (val) -> f(field(val))
+    apply2 = (f) ->
+      (other) ->
+        if other instanceof Bacon.Observable
+          combinator other, (val, other) -> f(field(val), other)
+        else
+          operation (val) -> f(field(val), other)
+    apply3 = (f) ->
+      (first, second) ->
+        operation (val) -> f(field(val), first, second)
+    context = addMatchers apply1, apply2, apply3
+    context["every"] = (fs...) ->
+      matches = Bacon._.map(((f) -> f(stream.map(field))), fs)
+      isEvery = Bacon._.fold(matches, Bacon.constant(true), (x,y) -> x.and(y))
+      operation(isEvery)
+    context["some"]  = (fs...) ->
+      matches = Bacon._.map(((f) -> f(stream.map(field))), fs)
+      isSome  = Bacon._.fold(matches, Bacon.constant(false), (x,y) -> x.or(y))
+      operation(isSome)
+    context
   Bacon.Observable::is = (fieldKey) ->
     context = this
     operation = (f) -> context.map(f)
     combinator = (observable, f) -> context.combine(observable, f)
-    asMatchers(operation, combinator, fieldKey)
+    asMatchers(context, operation, combinator, fieldKey)
   Bacon.Observable::where = (fieldKey) ->
     context = this
     operation = (f) -> context.filter(f)
     combinator = (observable, f) -> context.filter context.combine(observable, f)
-    asMatchers(operation, combinator, fieldKey)
+    asMatchers(context, operation, combinator, fieldKey)
   Bacon
 
 if module?
