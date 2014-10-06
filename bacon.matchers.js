@@ -4,7 +4,7 @@
     __slice = [].slice;
 
   init = function(Bacon) {
-    var addMatchers, addPositiveMatchers, asMatchers, contains, toFieldExtractor, toSimpleExtractor;
+    var addClauseMatchers, addMatchers, addPositiveMatchers, asMatchers, contains, toFieldExtractor, toSimpleExtractor;
     toFieldExtractor = function(f) {
       var partFuncs, parts;
       parts = f.slice(1).split(".");
@@ -49,31 +49,14 @@
     };
     addMatchers = function(apply1, apply2, apply3, stream, operation) {
       var context;
-      context = addPositiveMatchers(apply1, apply2, apply3);
-      context["every"] = function() {
-        var fs, isEvery, matches;
-        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        matches = Bacon._.map((function(f) {
-          return f(stream);
-        }), fs);
-        isEvery = Bacon._.fold(matches, Bacon.constant(true), function(x, y) {
-          return x.and(y);
-        });
-        return operation(isEvery);
-      };
-      context["some"] = function() {
-        var fs, isSome, matches;
-        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        matches = Bacon._.map((function(f) {
-          return f(stream);
-        }), fs);
-        isSome = Bacon._.fold(matches, Bacon.constant(false), function(x, y) {
-          return x.or(y);
-        });
-        return operation(isSome);
-      };
+      context = {};
+      addPositiveMatchers(context, apply1, apply2, apply3);
+      addClauseMatchers(context, stream, operation, function(s) {
+        return s;
+      });
       context["not"] = function() {
         var applyNot1, applyNot2, applyNot3, negatedContext;
+        negatedContext = {};
         applyNot1 = function(f) {
           return apply1(function(a) {
             return !f(a);
@@ -89,36 +72,39 @@
             return !f(val, a, b);
           });
         };
-        negatedContext = addPositiveMatchers(applyNot1, applyNot2, applyNot3);
-        negatedContext["every"] = function() {
-          var fs, isEvery, matches;
-          fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          matches = Bacon._.map((function(f) {
-            return f(stream).not();
-          }), fs);
-          isEvery = Bacon._.fold(matches, Bacon.constant(false), function(x, y) {
-            return x.or(y);
-          });
-          return operation(isEvery);
-        };
-        negatedContext["some"] = function() {
-          var fs, isSome, matches;
-          fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          matches = Bacon._.map((function(f) {
-            return f(stream).not();
-          }), fs);
-          isSome = Bacon._.fold(matches, Bacon.constant(true), function(x, y) {
-            return x.and(y);
-          });
-          return operation(isSome);
-        };
-        return negatedContext;
+        addPositiveMatchers(negatedContext, applyNot1, applyNot2, applyNot3);
+        return addClauseMatchers(negatedContext, stream, function(s) {
+          return operation(s.not());
+        });
       };
       return context;
     };
-    addPositiveMatchers = function(apply1, apply2, apply3) {
-      var context;
-      context = {};
+    addClauseMatchers = function(context, stream, operation) {
+      context["some"] = function() {
+        var fs, isSome, matches;
+        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        matches = Bacon._.map((function(f) {
+          return f(stream);
+        }), fs);
+        isSome = Bacon._.fold(matches, Bacon.constant(false), function(x, y) {
+          return x.or(y);
+        });
+        return operation(isSome);
+      };
+      context["every"] = function() {
+        var fs, isEvery, matches;
+        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        matches = Bacon._.map((function(f) {
+          return f(stream);
+        }), fs);
+        isEvery = Bacon._.fold(matches, Bacon.constant(true), function(x, y) {
+          return x.and(y);
+        });
+        return operation(isEvery);
+      };
+      return context;
+    };
+    addPositiveMatchers = function(context, apply1, apply2, apply3) {
       context["lessThan"] = apply2(function(a, b) {
         return a < b;
       });
