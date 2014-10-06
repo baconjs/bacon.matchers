@@ -27,13 +27,30 @@ init = (Bacon) ->
       false
 
 
-  addMatchers = (apply1, apply2, apply3) ->
+  addMatchers = (apply1, apply2, apply3, stream, operation) ->
     context = addPositiveMatchers apply1, apply2, apply3
+    context["every"] = (fs...) ->
+      matches = Bacon._.map(((f) -> f(stream)), fs)
+      isEvery = Bacon._.fold(matches, Bacon.constant(true), (x,y) -> x.and(y))
+      operation(isEvery)
+    context["some"]  = (fs...) ->
+      matches = Bacon._.map(((f) -> f(stream)), fs)
+      isSome  = Bacon._.fold(matches, Bacon.constant(false), (x,y) -> x.or(y))
+      operation(isSome)
     context["not"] = ->
       applyNot1 = (f) -> apply1 (a) -> not f(a)
       applyNot2 = (f) -> apply2 (a, b) -> not f(a, b)
       applyNot3 = (f) -> apply3 (val, a, b) -> not f(val, a, b)
-      addPositiveMatchers applyNot1, applyNot2, applyNot3
+      negatedContext = addPositiveMatchers applyNot1, applyNot2, applyNot3
+      negatedContext["every"] = (fs...) ->
+        matches = Bacon._.map(((f) -> f(stream).not()), fs)
+        isEvery = Bacon._.fold(matches, Bacon.constant(false), (x,y) -> x.or(y))
+        operation(isEvery)
+      negatedContext["some"]  = (fs...) ->
+        matches = Bacon._.map(((f) -> f(stream).not()), fs)
+        isSome  = Bacon._.fold(matches, Bacon.constant(true), (x,y) -> x.and(y))
+        operation(isSome)
+      negatedContext
     context
 
   addPositiveMatchers = (apply1, apply2, apply3) ->
@@ -74,8 +91,8 @@ init = (Bacon) ->
     context
 
   asMatchers = (stream, operation, combinator, fieldKey) ->
-    field = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
-    apply1 = (f) ->
+    field   = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
+    apply1  = (f) ->
       ->
         operation (val) -> f(field(val))
     apply2 = (f) ->
@@ -87,16 +104,7 @@ init = (Bacon) ->
     apply3 = (f) ->
       (first, second) ->
         operation (val) -> f(field(val), first, second)
-    context = addMatchers apply1, apply2, apply3
-    context["every"] = (fs...) ->
-      matches = Bacon._.map(((f) -> f(stream.map(field))), fs)
-      isEvery = Bacon._.fold(matches, Bacon.constant(true), (x,y) -> x.and(y))
-      operation(isEvery)
-    context["some"]  = (fs...) ->
-      matches = Bacon._.map(((f) -> f(stream.map(field))), fs)
-      isSome  = Bacon._.fold(matches, Bacon.constant(false), (x,y) -> x.or(y))
-      operation(isSome)
-    context
+    addMatchers apply1, apply2, apply3, stream.map(field), operation
   Bacon.Observable::is = (fieldKey) ->
     context = this
     operation = (f) -> context.map(f)

@@ -47,11 +47,33 @@
         return false;
       }
     };
-    addMatchers = function(apply1, apply2, apply3) {
+    addMatchers = function(apply1, apply2, apply3, stream, operation) {
       var context;
       context = addPositiveMatchers(apply1, apply2, apply3);
+      context["every"] = function() {
+        var fs, isEvery, matches;
+        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        matches = Bacon._.map((function(f) {
+          return f(stream);
+        }), fs);
+        isEvery = Bacon._.fold(matches, Bacon.constant(true), function(x, y) {
+          return x.and(y);
+        });
+        return operation(isEvery);
+      };
+      context["some"] = function() {
+        var fs, isSome, matches;
+        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        matches = Bacon._.map((function(f) {
+          return f(stream);
+        }), fs);
+        isSome = Bacon._.fold(matches, Bacon.constant(false), function(x, y) {
+          return x.or(y);
+        });
+        return operation(isSome);
+      };
       context["not"] = function() {
-        var applyNot1, applyNot2, applyNot3;
+        var applyNot1, applyNot2, applyNot3, negatedContext;
         applyNot1 = function(f) {
           return apply1(function(a) {
             return !f(a);
@@ -67,7 +89,30 @@
             return !f(val, a, b);
           });
         };
-        return addPositiveMatchers(applyNot1, applyNot2, applyNot3);
+        negatedContext = addPositiveMatchers(applyNot1, applyNot2, applyNot3);
+        negatedContext["every"] = function() {
+          var fs, isEvery, matches;
+          fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          matches = Bacon._.map((function(f) {
+            return f(stream).not();
+          }), fs);
+          isEvery = Bacon._.fold(matches, Bacon.constant(false), function(x, y) {
+            return x.or(y);
+          });
+          return operation(isEvery);
+        };
+        negatedContext["some"] = function() {
+          var fs, isSome, matches;
+          fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          matches = Bacon._.map((function(f) {
+            return f(stream).not();
+          }), fs);
+          isSome = Bacon._.fold(matches, Bacon.constant(true), function(x, y) {
+            return x.and(y);
+          });
+          return operation(isSome);
+        };
+        return negatedContext;
       };
       return context;
     };
@@ -110,7 +155,7 @@
       return context;
     };
     asMatchers = function(stream, operation, combinator, fieldKey) {
-      var apply1, apply2, apply3, context, field;
+      var apply1, apply2, apply3, field;
       field = fieldKey != null ? toFieldExtractor(fieldKey) : Bacon._.id;
       apply1 = function(f) {
         return function() {
@@ -139,30 +184,7 @@
           });
         };
       };
-      context = addMatchers(apply1, apply2, apply3);
-      context["every"] = function() {
-        var fs, isEvery, matches;
-        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        matches = Bacon._.map((function(f) {
-          return f(stream.map(field));
-        }), fs);
-        isEvery = Bacon._.fold(matches, Bacon.constant(true), function(x, y) {
-          return x.and(y);
-        });
-        return operation(isEvery);
-      };
-      context["some"] = function() {
-        var fs, isSome, matches;
-        fs = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        matches = Bacon._.map((function(f) {
-          return f(stream.map(field));
-        }), fs);
-        isSome = Bacon._.fold(matches, Bacon.constant(false), function(x, y) {
-          return x.or(y);
-        });
-        return operation(isSome);
-      };
-      return context;
+      return addMatchers(apply1, apply2, apply3, stream.map(field), operation);
     };
     Bacon.Observable.prototype.is = function(fieldKey) {
       var combinator, context, operation;

@@ -45,7 +45,7 @@ describe 'bacon.matchers', ->
         {title: 'Europa Report',            tags: ['SciFi']},
         {title: 'The Grand Budapest Hotel', tags: []}]
       ).is('.tags.length').greaterThan(0)
-      
+
       assertValues [true, true, false], isValid, done
   describe 'matchers', ->
     describe 'equalTo', ->
@@ -218,7 +218,7 @@ describe 'bacon.matchers', ->
           stream = Bacon.once(fun).is().memberOf(fun)
           assertConstantly false, stream, done
     describe 'every', ->
-      it 'should match all clauses', (done) -> 
+      it 'should match all clauses', (done) ->
         stream = Bacon.fromArray([
           { power_pill: true,   ghosts: ["Inky", "Pinky"]},
           { power_pill: false,  ghosts: ["Inky", "Pinky", "Blinky", "Clyde"]},
@@ -245,3 +245,31 @@ describe 'bacon.matchers', ->
         )
 
         assertValues [true, true, true, false], matches, done
+    describe 'not every', ->
+      it 'should match any negated clauses', (done) ->
+        stream = Bacon.fromArray([
+          { power_pill: true,   ghosts: ["Inky", "Pinky"]},
+          { power_pill: false,  ghosts: ["Inky", "Pinky", "Blinky", "Clyde"]},
+          { power_pill: false,  ghosts: ["Blinky", "Clyde"]},
+          { power_pill: true,   ghosts: ["Clyde"]}
+        ])
+        matches = stream.delay(0).is().not().every(
+          (s) -> s.is(".ghosts").containerOf("Inky"),
+          (s) -> s.map(".power_pill").not()
+        )
+
+        assertValues [true, false, true, true], matches, done
+    describe 'not some', ->
+      it 'should match all negated clauses', (done) ->
+        stream = Bacon.fromArray([
+          { power_pill: true,   ghosts: ["Inky", "Pinky"]},
+          { power_pill: false,  ghosts: ["Inky", "Pinky", "Blinky", "Clyde"]},
+          { power_pill: false,  ghosts: ["Blinky", "Clyde"]},
+          { power_pill: true,   ghosts: ["Clyde"]}
+        ])
+        matches = stream.delay(0).is().not().some(
+          (s) -> s.is(".ghosts").containerOf("Inky"),
+          (s) -> s.map(".power_pill").not()
+        )
+
+        assertValues [false, false, false, true], matches, done
