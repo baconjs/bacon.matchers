@@ -51,9 +51,7 @@
       var context;
       context = {};
       addPositiveMatchers(context, apply1, apply2, apply3);
-      addClauseMatchers(context, stream, operation, function(s) {
-        return s;
-      });
+      addClauseMatchers(context, stream, operation);
       context["not"] = function() {
         var applyNot1, applyNot2, applyNot3, negatedContext;
         negatedContext = {};

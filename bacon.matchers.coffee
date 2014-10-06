@@ -30,7 +30,7 @@ init = (Bacon) ->
   addMatchers = (apply1, apply2, apply3, stream, operation) ->
     context = {}
     addPositiveMatchers context, apply1, apply2, apply3
-    addClauseMatchers context, stream, operation, (s) -> s
+    addClauseMatchers context, stream, operation
     context["not"] = ->
       negatedContext = {}
       applyNot1 = (f) -> apply1 (a) -> not f(a)
