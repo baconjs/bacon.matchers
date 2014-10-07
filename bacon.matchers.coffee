@@ -27,17 +27,31 @@ init = (Bacon) ->
       false
 
 
-  addMatchers = (apply1, apply2, apply3) ->
-    context = addPositiveMatchers apply1, apply2, apply3
+  addMatchers = (apply1, apply2, apply3, stream, operation) ->
+    context = {}
+    addPositiveMatchers context, apply1, apply2, apply3
+    addClauseMatchers context, stream, operation
     context["not"] = ->
+      negatedContext = {}
       applyNot1 = (f) -> apply1 (a) -> not f(a)
       applyNot2 = (f) -> apply2 (a, b) -> not f(a, b)
       applyNot3 = (f) -> apply3 (val, a, b) -> not f(val, a, b)
-      addPositiveMatchers applyNot1, applyNot2, applyNot3
+      addPositiveMatchers negatedContext, applyNot1, applyNot2, applyNot3
+      addClauseMatchers negatedContext, stream, (s) -> operation(s.not())
     context
 
-  addPositiveMatchers = (apply1, apply2, apply3) ->
-    context = {}
+  addClauseMatchers = (context, stream, operation) ->
+    context["some"] = (fs...) ->
+      matches = Bacon._.map(((f) -> f(stream)), fs)
+      isSome  = Bacon._.fold(matches, Bacon.constant(false), (x,y) -> x.or(y))
+      operation(isSome)
+    context["every"] = (fs...) ->
+      matches = Bacon._.map(((f) -> f(stream)), fs)
+      isEvery = Bacon._.fold(matches, Bacon.constant(true), (x,y) -> x.and(y))
+      operation(isEvery)
+    context
+
+  addPositiveMatchers = (context, apply1, apply2, apply3) ->
     context["lessThan"] = apply2((a, b) ->
       a < b
     )
@@ -71,33 +85,33 @@ init = (Bacon) ->
     context["memberOf"] = apply2((a, b) ->
       contains(b,a)
     )
-
     context
-  asMatchers = (operation, combinator, fieldKey) ->
-        field = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
-        apply1 = (f) ->
-          ->
-            operation (val) -> f(field(val))
-        apply2 = (f) ->
-          (other) ->
-            if other instanceof Bacon.Observable
-              combinator other, (val, other) -> f(field(val), other)
-            else
-              operation (val) -> f(field(val), other)
-        apply3 = (f) ->
-          (first, second) ->
-            operation (val) -> f(field(val), first, second)
-        addMatchers apply1, apply2, apply3
+
+  asMatchers = (stream, operation, combinator, fieldKey) ->
+    field   = if fieldKey? then toFieldExtractor(fieldKey) else Bacon._.id
+    apply1  = (f) ->
+      ->
+        operation (val) -> f(field(val))
+    apply2 = (f) ->
+      (other) ->
+        if other instanceof Bacon.Observable
+          combinator other, (val, other) -> f(field(val), other)
+        else
+          operation (val) -> f(field(val), other)
+    apply3 = (f) ->
+      (first, second) ->
+        operation (val) -> f(field(val), first, second)
+    addMatchers apply1, apply2, apply3, stream.map(field), operation
   Bacon.Observable::is = (fieldKey) ->
     context = this
     operation = (f) -> context.map(f)
     combinator = (observable, f) -> context.combine(observable, f)
-    asMatchers(operation, combinator, fieldKey)
+    asMatchers(context, operation, combinator, fieldKey)
   Bacon.Observable::where = (fieldKey) ->
     context = this
     operation = (f) -> context.filter(f)
     combinator = (observable, f) -> context.filter context.combine(observable, f)
-    asMatchers(operation, combinator, fieldKey)
+    asMatchers(context, operation, combinator, fieldKey)
   Bacon
 
 if module?

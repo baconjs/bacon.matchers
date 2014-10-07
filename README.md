@@ -97,6 +97,32 @@ Bacon.once({ alien: 'morninglightmountain' })
 ```
 
 
+`some(fs...)` applies multiple "clauses", and matches when any clause is true.
+Clauses are functions that map the observable to an observable of boolean values.
+For example: 
+
+```javascript
+Bacon.once({ power_pill: true,   ghosts: ["Inky", "Pinky"]})
+  .is()
+  .some(
+    function(stream){ return stream.is(".power_pill").truthy(); },
+    function(stream){ return stream.is(".ghosts").containerOf("Clyde"); }
+  ) // is true
+```
+
+`every(fs...)` applies multiple "clauses", and matches when all clauses are true.
+For example: 
+
+```javascript
+Bacon.once({ power_pill: true,   ghosts: ["Inky", "Pinky"]})
+  .is()
+  .every(
+    function(stream){ return stream.is(".power_pill").truthy(); },
+    function(stream){ return stream.is(".ghosts").containerOf("Clyde"); }
+  ) // is false
+```
+
+
 ## Browser support
 
 IE 9 and above.
