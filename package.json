@@ -11,5 +11,6 @@
   },
   "scripts": {
     "prepublish": "./build"
-  }
+  },
+  "main": "bacon.matchers.js"
 }
